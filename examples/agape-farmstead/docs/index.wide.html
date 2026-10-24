@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" class="deck-landscape">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agape Farmstead — Proposal Decks</title>
+<meta name="description" content="Growing reach, rooted in faith and the land. Three proposals for agapefarmstead.com — Clarksville and Adams, Tennessee.">
+<meta property="og:title" content="Agape Farmstead">
+<meta property="og:description" content="Growing reach, rooted in faith and the land. Three proposals for agapefarmstead.com — Clarksville and Adams, Tennessee.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#3d4a2c">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<a class="flip" href="index.html">Portrait</a>
+<nav class="dots" id="dots"></nav>
+<a class="site-link" href="https://www.agapefarmstead.com">agapefarmstead.com</a>
+<div class="stage" id="stage">
+<section class="slide hero" id="s1"><div class="inner">
+  <span class="tag">Proposals</span>
+  <h1>Agape Farmstead</h1>
+  <p class="sub">Growing reach, rooted in faith and the land. Three proposals for agapefarmstead.com — Clarksville and Adams, Tennessee.</p>
+  <div class="deck-links" style="margin-top:22px">
+    <a class="card deck-link" href="seo.wide.html">
+      <div class="pillar">Phase 1 — Quick Wins</div>
+      <h3>SEO &amp; Content Optimization</h3>
+      <p>A two-week on-page pilot so pasture-raised meat in Adams and Clarksville shows up with the right title, snippet, and local listing.</p>
+    </a>
+    <a class="card deck-link" href="thanksgiving.wide.html">
+      <div class="pillar">200-Mile Delivery</div>
+      <h3>Thanksgiving Delivery</h3>
+      <p>Fresh birds batched on six corridors out of Nashville, inside 200 miles. Payton runs the routes. Last drop November 24.</p>
+    </a>
+    <a class="card deck-link" href="brand.wide.html">
+      <div class="pillar">Long-Term Vision</div>
+      <h3>Brand Sustainability &amp; Growth</h3>
+      <p>A five-year direction: findable this year, recurring next year, and nothing later that the repeat orders have not earned.</p>
+    </a>
+  </div>
+  <p class="footer-note" style="margin-top:18px">Payton Byrd &#183; 615-574-8101 &#183; plbyrd@gmail.com</p>
+</div></section>
+
+</div>
+<script>
+  const stage = document.getElementById("stage");
+  const slides = stage.querySelectorAll(".slide");
+  const dots = document.getElementById("dots");
+  const bar = document.getElementById("bar");
+  slides.forEach((s, i) => { const a = document.createElement("a"); a.href = "#s" + (i + 1); dots.appendChild(a); });
+  const dotLinks = dots.querySelectorAll("a");
+  function update() {
+    const max = stage.scrollWidth - stage.clientWidth;
+    bar.style.width = (max > 0 ? (stage.scrollLeft / max) * 100 : 0) + "%";
+    let active = 0;
+    slides.forEach((s, i) => { if (s.offsetLeft - stage.clientWidth / 2 <= stage.scrollLeft) active = i; });
+    dotLinks.forEach((d, i) => d.classList.toggle("active", i === active));
+  }
+  stage.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("keydown", (e) => {
+    const w = stage.clientWidth;
+    if (e.key === "ArrowRight") stage.scrollBy({ left: w, behavior: "smooth" });
+    if (e.key === "ArrowLeft") stage.scrollBy({ left: -w, behavior: "smooth" });
+  });
+  update();
+</script>
+</body>
+</html>

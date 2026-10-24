@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="deck-landscape">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITLE__</title>
+<meta name="description" content="__DESCRIPTION__">
+<meta property="og:title" content="__OG_TITLE__">
+<meta property="og:description" content="__OG_DESCRIPTION__">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="__THEME_COLOR__">
+<link rel="stylesheet" href="__CSS__theme.css">
+<link rel="stylesheet" href="__CSS__deck.css">
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<a class="flip" href="__FLIP__">Portrait</a>
+<nav class="dots" id="dots"></nav>
+<a class="site-link" href="__SITE_URL__">__SITE_LABEL__</a>
+<div class="stage" id="stage">
+__SLIDES__
+</div>
+<script>
+  const stage = document.getElementById("stage");
+  const slides = stage.querySelectorAll(".slide");
+  const dots = document.getElementById("dots");
+  const bar = document.getElementById("bar");
+  slides.forEach((s, i) => { const a = document.createElement("a"); a.href = "#s" + (i + 1); dots.appendChild(a); });
+  const dotLinks = dots.querySelectorAll("a");
+  function update() {
+    const max = stage.scrollWidth - stage.clientWidth;
+    bar.style.width = (max > 0 ? (stage.scrollLeft / max) * 100 : 0) + "%";
+    let active = 0;
+    slides.forEach((s, i) => { if (s.offsetLeft - stage.clientWidth / 2 <= stage.scrollLeft) active = i; });
+    dotLinks.forEach((d, i) => d.classList.toggle("active", i === active));
+  }
+  stage.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("keydown", (e) => {
+    const w = stage.clientWidth;
+    if (e.key === "ArrowRight") stage.scrollBy({ left: w, behavior: "smooth" });
+    if (e.key === "ArrowLeft") stage.scrollBy({ left: -w, behavior: "smooth" });
+  });
+  update();
+</script>
+</body>
+</html>
