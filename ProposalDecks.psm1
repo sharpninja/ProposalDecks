@@ -1,67 +1,11 @@
 Set-StrictMode -Version Latest
 
 $script:ModuleRoot = $PSScriptRoot
+Import-Module (Join-Path $script:ModuleRoot 'modules/powershell-yaml/powershell-yaml.psd1') -DisableNameChecking
 
 function ConvertFrom-DeckYaml {
     param([Parameter(Mandatory)][string]$Text)
-    $lines = $Text -split "`n"
-    $root = [ordered]@{}
-    $stack = New-Object System.Collections.Stack
-    $stack.Push(@{ Indent = -1; Node = $root })
-    function Next-Line([int]$i) {
-        for ($j = $i + 1; $j -lt $lines.Count; $j++) {
-            $l = $lines[$j]
-            if ($l -match '^\s*#' -or $l -match '^\s*$') { continue }
-            return $l
-        }
-        return ""
-    }
-    for ($i = 0; $i -lt $lines.Count; $i++) {
-        $raw = $lines[$i].TrimEnd("`r")
-        if ($raw -match '^\s*#' -or $raw -match '^\s*$') { continue }
-        if ($raw -match '^(\s*)-\s+(.*)$') {
-            $indent = $Matches[1].Length
-            $content = $Matches[2]
-            while ($stack.Peek().Indent -ge $indent) { [void]$stack.Pop() }
-            $parent = $stack.Peek().Node
-            if ($parent -isnot [System.Collections.IList]) { throw "YAML error: $raw" }
-            if ($content -match '^([A-Za-z_][\w]*):\s*(.*)$') {
-                $obj = [ordered]@{}
-                $obj[$Matches[1].Trim()] = $Matches[2].Trim().Trim('"').Trim("'")
-                [void]$parent.Add($obj)
-                $stack.Push(@{ Indent = $indent; Node = $obj })
-            }
-            else {
-                [void]$parent.Add($content.Trim().Trim('"').Trim("'"))
-            }
-        }
-        elseif ($raw -match '^(\s*)([^:]+):\s*(.*)$') {
-            $indent = $Matches[1].Length
-            $key = $Matches[2].Trim()
-            $val = $Matches[3].Trim().Trim('"').Trim("'")
-            while ($stack.Peek().Indent -ge $indent) { [void]$stack.Pop() }
-            $parent = $stack.Peek().Node
-            if ($parent -is [System.Collections.IList]) { throw "YAML error: $raw" }
-            if ($val -eq '') {
-                $nxt = Next-Line $i
-                if ($nxt -match '^\s*-\s+') {
-                    $lst = New-Object System.Collections.ArrayList
-                    $parent[$key] = $lst
-                    $stack.Push(@{ Indent = $indent; Node = $lst })
-                }
-                else {
-                    $obj = [ordered]@{}
-                    $parent[$key] = $obj
-                    $stack.Push(@{ Indent = $indent; Node = $obj })
-                }
-            }
-            else {
-                $parent[$key] = $val
-            }
-        }
-        else { throw "YAML error: $raw" }
-    }
-    return $root
+    return ConvertFrom-Yaml -Yaml $Text
 }
 
 function Read-DeckFile {
