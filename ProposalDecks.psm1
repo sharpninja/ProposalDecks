@@ -25,7 +25,7 @@ function ConvertFrom-DeckYaml {
             while ($stack.Peek().Indent -ge $indent) { [void]$stack.Pop() }
             $parent = $stack.Peek().Node
             if ($parent -isnot [System.Collections.IList]) { throw "YAML error: $raw" }
-            if ($content -match '^(.+?):\s*(.*)$') {
+            if ($content -match '^([A-Za-z_][\w]*):\s*(.*)$') {
                 $obj = [ordered]@{}
                 $obj[$Matches[1].Trim()] = $Matches[2].Trim().Trim('"').Trim("'")
                 [void]$parent.Add($obj)
