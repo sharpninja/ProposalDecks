@@ -213,25 +213,47 @@ function New-SlideHtml {
 }
 
 function New-LandingHtml {
-    param($Index, $Decks, [string]$Suffix)
+    param($Index, $Decks, [string]$Suffix, [switch]$Paged)
     $sb = New-Object System.Text.StringBuilder
-    [void]$sb.AppendLine('<section class="slide hero" id="s1"><div class="inner">')
+    if (-not $Paged) {
+        [void]$sb.AppendLine('<section class="slide hero" id="s1"><div class="inner">')
+        [void]$sb.AppendLine('  <span class="tag">Proposals</span>')
+        [void]$sb.AppendLine("  <h1>$(ConvertTo-HtmlText $Index['name'])</h1>")
+        if ($Index['intro']) { [void]$sb.AppendLine("  <p class=`"sub`">$(ConvertTo-HtmlText $Index['intro'])</p>") }
+        [void]$sb.AppendLine('  <div class="deck-links" style="margin-top:22px">')
+        foreach ($deck in $Decks) {
+            $meta = $deck.Meta
+            $href = "$($meta['slug'])$Suffix"
+            [void]$sb.AppendLine("    <a class=`"card deck-link`" href=`"$href`">")
+            if ($meta['eyebrow']) { [void]$sb.AppendLine("      <div class=`"pillar`">$(ConvertTo-HtmlText $meta['eyebrow'])</div>") }
+            [void]$sb.AppendLine("      <h3>$(ConvertTo-HtmlText $meta['og_title'])</h3>")
+            if ($meta['blurb']) { [void]$sb.AppendLine("      <p>$(ConvertTo-HtmlText $meta['blurb'])</p>") }
+            [void]$sb.AppendLine('    </a>')
+        }
+        [void]$sb.AppendLine('  </div>')
+        if ($Index['contact']) { [void]$sb.AppendLine("  <p class=`"footer-note`" style=`"margin-top:18px`">$(ConvertTo-HtmlText $Index['contact'])</p>") }
+        [void]$sb.AppendLine('</div></section>')
+        return $sb.ToString()
+    }
+    $n = 1
+    [void]$sb.AppendLine("<section class=`"slide hero`" id=`"s$n`"><div class=`"inner`">")
     [void]$sb.AppendLine('  <span class="tag">Proposals</span>')
     [void]$sb.AppendLine("  <h1>$(ConvertTo-HtmlText $Index['name'])</h1>")
     if ($Index['intro']) { [void]$sb.AppendLine("  <p class=`"sub`">$(ConvertTo-HtmlText $Index['intro'])</p>") }
-    [void]$sb.AppendLine('  <div class="deck-links" style="margin-top:22px">')
-    foreach ($deck in $Decks) {
-        $meta = $deck.Meta
-        $href = "$($meta['slug'])$Suffix"
-        [void]$sb.AppendLine("    <a class=`"card deck-link`" href=`"$href`">")
-        if ($meta['eyebrow']) { [void]$sb.AppendLine("      <div class=`"pillar`">$(ConvertTo-HtmlText $meta['eyebrow'])</div>") }
-        [void]$sb.AppendLine("      <h3>$(ConvertTo-HtmlText $meta['og_title'])</h3>")
-        if ($meta['blurb']) { [void]$sb.AppendLine("      <p>$(ConvertTo-HtmlText $meta['blurb'])</p>") }
-        [void]$sb.AppendLine('    </a>')
-    }
-    [void]$sb.AppendLine('  </div>')
+    [void]$sb.AppendLine('  <p class="sub">Swipe sideways for each proposal.</p>')
     if ($Index['contact']) { [void]$sb.AppendLine("  <p class=`"footer-note`" style=`"margin-top:18px`">$(ConvertTo-HtmlText $Index['contact'])</p>") }
     [void]$sb.AppendLine('</div></section>')
+    foreach ($deck in $Decks) {
+        $n++
+        $meta = $deck.Meta
+        $href = "$($meta['slug'])$Suffix"
+        [void]$sb.AppendLine("<section class=`"slide cards`" id=`"s$n`"><div class=`"inner`">")
+        if ($meta['eyebrow']) { [void]$sb.AppendLine("  <span class=`"tag`">$(ConvertTo-HtmlText $meta['eyebrow'])</span>") }
+        [void]$sb.AppendLine("  <h2>$(ConvertTo-HtmlText $meta['og_title'])</h2>")
+        if ($meta['blurb']) { [void]$sb.AppendLine("  <p class=`"sub`">$(ConvertTo-HtmlText $meta['blurb'])</p>") }
+        [void]$sb.AppendLine("  <p style=`"margin-top:18px`"><a class=`"btn`" href=`"$href`">Open</a></p>")
+        [void]$sb.AppendLine('</div></section>')
+    }
     return $sb.ToString()
 }
 
@@ -300,7 +322,7 @@ function Build-ProposalSite {
         '__THEME_COLOR__' = $color
         '__SITE_URL__' = $site
         '__SITE_LABEL__' = $label
-        '__SLIDES__' = (New-LandingHtml -Index $index -Decks $decks -Suffix '.wide.html')
+        '__SLIDES__' = (New-LandingHtml -Index $index -Decks $decks -Suffix '.wide.html' -Paged)
         '__FLIP__' = 'index.html'
         '__CSS__' = ''
     } (Join-Path $OutDir 'index.wide.html')

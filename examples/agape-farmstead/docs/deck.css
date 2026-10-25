@@ -83,13 +83,16 @@ a.deck-link h3 { font-size: 1.35rem; }
   .deck-portrait .two-col .card { flex: 1; }
 }
 
-.deck-landscape, .deck-landscape body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+.deck-landscape, .deck-landscape body {
+  height: 100%; overflow: hidden; overscroll-behavior: none; touch-action: none;
+}
+.deck-landscape body { position: fixed; inset: 0; width: 100%; }
 .deck-landscape .stage {
-  width: 100%; height: 100vh; height: 100dvh; overflow: hidden; touch-action: none;
+  width: 100%; height: 100%; overflow: hidden; touch-action: none;
 }
 .deck-landscape .track { display: flex; height: 100%; touch-action: none; will-change: transform; }
 .deck-landscape .slide {
-  flex: 0 0 100%; width: 100%; min-width: 100%; height: 100%; touch-action: none;
+  flex: 0 0 100%; width: 100%; height: 100%; touch-action: none;
   display: flex; flex-direction: column; justify-content: center;
   padding: 48px 8vw 64px; position: relative;
 }

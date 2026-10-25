@@ -159,7 +159,7 @@
 <script>
   const stage = document.getElementById("stage");
   const track = document.getElementById("track");
-  const slides = track.querySelectorAll(".slide");
+  const slides = Array.from(track.children).filter((el) => el.classList.contains("slide"));
   const dots = document.getElementById("dots");
   const bar = document.getElementById("bar");
   let index = 0;
@@ -167,7 +167,13 @@
   let originX = 0;
   let originY = 0;
   let dragX = 0;
+  let moved = false;
   function width() { return stage.clientWidth || window.innerWidth; }
+  function layoutSlides() {
+    const w = width();
+    slides.forEach((s) => { s.style.flex = "0 0 " + w + "px"; s.style.width = w + "px"; });
+    track.style.width = (w * slides.length) + "px";
+  }
   function place(offset, animate) {
     track.style.transition = animate ? "transform 280ms ease" : "none";
     track.style.transform = "translate3d(" + ((-index * width()) + offset) + "px,0,0)";
@@ -195,51 +201,54 @@
   });
   stage.addEventListener("touchstart", (e) => {
     if (e.touches.length !== 1) return;
-    if (e.target.closest("a, button")) return;
     dragging = true;
+    moved = false;
     originX = e.touches[0].clientX;
     originY = e.touches[0].clientY;
     dragX = 0;
     place(0, false);
-  }, { passive: true });
+  }, { passive: false });
   document.addEventListener("touchmove", (e) => {
     if (!dragging || e.touches.length !== 1) return;
-    const x = e.touches[0].clientX;
-    const y = e.touches[0].clientY;
-    const dx = x - originX;
-    const dy = y - originY;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      e.preventDefault();
-      dragX = dx;
-      place(dx, false);
-    }
-  }, { passive: false });
+    const dx = e.touches[0].clientX - originX;
+    const dy = e.touches[0].clientY - originY;
+    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    e.preventDefault();
+    moved = true;
+    dragX = dx;
+    place(dx, false);
+  }, { passive: false, capture: true });
   function finish() {
     if (!dragging) return;
     dragging = false;
-    if (dragX <= -40) go(index + 1);
-    else if (dragX >= 40) go(index - 1);
+    if (dragX <= -36) go(index + 1);
+    else if (dragX >= 36) go(index - 1);
     else go(index);
   }
   document.addEventListener("touchend", finish);
   document.addEventListener("touchcancel", finish);
+  document.addEventListener("click", (e) => {
+    if (!moved) return;
+    e.preventDefault();
+    e.stopPropagation();
+    moved = false;
+  }, true);
   stage.addEventListener("pointerdown", (e) => {
     if (e.pointerType !== "mouse" || e.button !== 0) return;
-    if (e.target.closest("a, button")) return;
     dragging = true;
     originX = e.clientX;
-    originY = e.clientY;
     dragX = 0;
     place(0, false);
-    stage.setPointerCapture(e.pointerId);
   });
   stage.addEventListener("pointermove", (e) => {
-    if (!dragging || e.pointerType !== "mouse") return;
+    if (!dragging || e.pointerType !== "mouse" || (e.buttons & 1) === 0) return;
     dragX = e.clientX - originX;
     place(dragX, false);
   });
   stage.addEventListener("pointerup", (e) => { if (e.pointerType === "mouse") finish(); });
-  window.addEventListener("resize", () => place(0, false));
+  window.addEventListener("resize", () => { layoutSlides(); place(0, false); });
+  layoutSlides();
   go(0);
 </script>
 </body>
