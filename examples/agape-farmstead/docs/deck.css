@@ -85,13 +85,11 @@ a.deck-link h3 { font-size: 1.35rem; }
 
 .deck-landscape, .deck-landscape body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 .deck-landscape .stage {
-  display: flex; width: 100%; height: 100vh; height: 100dvh; overflow-x: auto; overflow-y: hidden;
-  scroll-snap-type: x mandatory; scroll-behavior: smooth; touch-action: none;
-  overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+  width: 100%; height: 100vh; height: 100dvh; overflow: hidden; touch-action: none;
 }
+.deck-landscape .track { display: flex; height: 100%; touch-action: none; will-change: transform; }
 .deck-landscape .slide {
-  flex: 0 0 100%; width: 100%; min-width: 100%; height: 100%; scroll-snap-align: start;
-  touch-action: none;
+  flex: 0 0 100%; width: 100%; min-width: 100%; height: 100%; touch-action: none;
   display: flex; flex-direction: column; justify-content: center;
   padding: 48px 8vw 64px; position: relative;
 }
