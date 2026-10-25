@@ -48,21 +48,60 @@
   const slides = stage.querySelectorAll(".slide");
   const dots = document.getElementById("dots");
   const bar = document.getElementById("bar");
-  slides.forEach((s, i) => { const a = document.createElement("a"); a.href = "#s" + (i + 1); dots.appendChild(a); });
+  function go(index) {
+    const w = stage.clientWidth || window.innerWidth;
+    const next = Math.max(0, Math.min(slides.length - 1, index));
+    stage.scrollTo({ left: next * w, behavior: "smooth" });
+  }
+  slides.forEach((s, i) => {
+    const a = document.createElement("a");
+    a.href = "#s" + (i + 1);
+    a.addEventListener("click", (e) => { e.preventDefault(); go(i); });
+    dots.appendChild(a);
+  });
   const dotLinks = dots.querySelectorAll("a");
   function update() {
+    const w = stage.clientWidth || 1;
     const max = stage.scrollWidth - stage.clientWidth;
     bar.style.width = (max > 0 ? (stage.scrollLeft / max) * 100 : 0) + "%";
-    let active = 0;
-    slides.forEach((s, i) => { if (s.offsetLeft - stage.clientWidth / 2 <= stage.scrollLeft) active = i; });
+    const active = Math.max(0, Math.min(slides.length - 1, Math.round(stage.scrollLeft / w)));
     dotLinks.forEach((d, i) => d.classList.toggle("active", i === active));
   }
   stage.addEventListener("scroll", update, { passive: true });
   window.addEventListener("keydown", (e) => {
-    const w = stage.clientWidth;
-    if (e.key === "ArrowRight") stage.scrollBy({ left: w, behavior: "smooth" });
-    if (e.key === "ArrowLeft") stage.scrollBy({ left: -w, behavior: "smooth" });
+    const w = stage.clientWidth || window.innerWidth;
+    const current = Math.round(stage.scrollLeft / w);
+    if (e.key === "ArrowRight") go(current + 1);
+    if (e.key === "ArrowLeft") go(current - 1);
   });
+  let pointer = null, originX = 0, originY = 0, horizontal = false;
+  stage.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (e.target.closest("a, button")) return;
+    pointer = e.pointerId;
+    originX = e.clientX;
+    originY = e.clientY;
+    horizontal = false;
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener("pointermove", (e) => {
+    if (e.pointerId !== pointer) return;
+    const dx = e.clientX - originX;
+    const dy = e.clientY - originY;
+    if (!horizontal && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) horizontal = Math.abs(dx) > Math.abs(dy);
+    if (horizontal) e.preventDefault();
+  });
+  stage.addEventListener("pointerup", (e) => {
+    if (e.pointerId !== pointer) return;
+    const dx = e.clientX - originX;
+    const dy = e.clientY - originY;
+    const w = stage.clientWidth || window.innerWidth;
+    const current = Math.round(stage.scrollLeft / w);
+    pointer = null;
+    if (!horizontal || Math.abs(dx) < 36 || Math.abs(dx) < Math.abs(dy)) return;
+    go(current + (dx < 0 ? 1 : -1));
+  });
+  stage.addEventListener("pointercancel", (e) => { if (e.pointerId === pointer) pointer = null; });
   update();
 </script>
 </body>
